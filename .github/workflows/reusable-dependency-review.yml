@@ -1,6 +1,10 @@
 name: 'Dependency Review'
 
 on:
+  push:
+    branches: [ $default-branch, $protected-branches ]
+  pull_request:
+    branches: [ $default-branch ]
   workflow_call:
     inputs:
       fail-on-severity:
@@ -14,6 +18,7 @@ on:
         type: string
         description: "Add a custom list of licenses you want to block."
 
+# Declare default permissions as read only.
 permissions:
   contents: read
 
@@ -22,17 +27,36 @@ jobs:
     name: Scan dependencies for license compliance
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            ghcr.io:443
+            github.com:443
+            api.github.com:443
+            pkg-containers.githubusercontent.com:443
+            auth.docker.io:443
+            registry-1.docker.io:443
+            production.cloudflare.docker.com:443
+            archive.ubuntu.com:80
+            security.ubuntu.com:80
+            api.nuget.org:443
+            packages.microsoft.com:443
+
       - name: Check out code base
         if: github.event_name == 'push' || github.event_name == 'schedule'
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Check out code base
         if: github.event_name == 'pull_request'
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
         with:
           fetch-depth: 0
+          persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Dependency Review
