@@ -1,0 +1,189 @@
+# Copyright 2020 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the MIT license
+# that can be found in the LICENSE file.
+
+name: Docker
+
+on:
+  workflow_call:
+    inputs:
+      owner:
+        type: string
+        description: "The owner of image"
+        default: "wabarc"
+      name:
+        type: string
+        required: true
+        description: "The name of image"
+      docker-token:
+        type: string
+        description: "Token for DockerHub"
+      github-token:
+        type: string
+        description: "Token for GitHub Packages"
+      latest:
+        type: string
+        description: "Defines a global behavior for tag which handle latest tag."
+        default: "auto"
+      prefix:
+        type: string
+        description: "Defines a global prefix for each generated tag."
+      suffix:
+        type: string
+        description: "Defines a global suffix for each generated tag."
+      onlatest:
+        type: boolean
+        description: "Defines a global prefix and suffix for each generated tag and optionally for `latest`."
+      files:
+        type: string
+        description: "Docker buildx bake file"
+        default: "docker-bake.hcl"
+      build-targets:
+        type: string
+        required: true
+        description: "A comma separated list of target for build image."
+      push-targets:
+        type: string
+        required: true
+        description: "A comma separated list of target for push image."
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  docker-buildx-bake:
+    name: Build and push Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            ghcr.io:443
+            github.com:443
+            api.github.com:443
+            pkg-containers.githubusercontent.com:443
+            auth.docker.io:443
+            registry-1.docker.io:443
+            production.cloudflare.docker.com:443
+
+      - name: Check out code base
+        if: github.event_name == 'push' || github.event_name == 'schedule'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Prepare
+        id: prep
+        run: |
+          GHCR_HOST=ghcr.io
+          DOCKER_HOST=docker.io
+          DOCKER_IMAGE_SCOPE=${{ inputs.owner }}/${{ inputs.name }} # foo/bar
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            DOCKER_IMAGE_VERSION=nightly
+          elif [[ $GITHUB_REF == refs/tags/* ]]; then
+            DOCKER_IMAGE_VERSION=${GITHUB_REF#refs/*/v}
+            TAGS="${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE}:latest,${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}:latest"
+          else
+            DOCKER_IMAGE_VERSION=edge
+          fi
+          TAGS="${TAGS},${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE}:${DOCKER_IMAGE_VERSION},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}:${DOCKER_IMAGE_VERSION}"
+          echo ::set-output name=tags::${TAGS}
+          echo ::set-output name=version::${DOCKER_IMAGE_VERSION}
+          echo ::set-output name=docker::${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE}
+          echo ::set-output name=ghcr::${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}
+          echo ::set-output name=images::${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18 # v2.1.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8c0edbc76e98fa90f69d9a2c020dcb50019dc325 # v2.2.1
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate meta
+        id: meta
+        uses: docker/metadata-action@57396166ad8aefe6098280995947635806a0e6ea # v4.1.1
+        with:
+          images: ${{ steps.prep.outputs.images }}
+          flavor: |
+            latest=${{ inputs.latest }}
+            prefix=${{ inputs.prefix }},onlatest=${{ inputs.onlatest }}
+            suffix=${{ inputs.suffix }},onlatest=${{ inputs.onlatest }}
+          tags: |
+            type=semver,pattern=${{ steps.prep.outputs.version }}
+            type=raw,${{ steps.prep.outputs.version }}
+
+      - name: Build artifacts
+        uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
+        env:
+          WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+        with:
+          targets: ${{ inputs.build-targets }}
+          files: ${{ inputs.files }}
+          set: |
+            *.cache-from=type=local,src=/tmp/.image-cache/artifacts
+            *.cache-to=type=local,dest=/tmp/.image-cache-new/artifacts
+
+      - name: Build and push Docker image
+        uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
+        env:
+          WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+        with:
+          targets: ${{ inputs.push-targets }}
+          push: ${{ github.event_name != 'pull_request' }}
+          files: |
+            ${{ inputs.files }}
+            ${{ steps.meta.outputs.bake-file }}
+          set: |
+            *.cache-from=type=local,src=/tmp/.image-cache/image
+            *.cache-to=type=local,dest=/tmp/.image-cache-new/image
+
+      - name: Check manifest
+        if: github.event_name != 'pull_request'
+        run: |
+          docker buildx imagetools inspect ${{ steps.prep.outputs.docker }}:${{ steps.meta.outputs.version }}
+          docker buildx imagetools inspect ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+
+      - name: Inspect image
+        if: github.event_name != 'pull_request'
+        run: |
+          docker pull ${{ steps.prep.outputs.docker }}:${{ steps.meta.outputs.version }}
+          docker image inspect ${{ steps.prep.outputs.docker }}:${{ steps.meta.outputs.version }}
+          docker pull ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+          docker image inspect ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wayback
+          path: ./dist/*
+          if-no-files-found: error
+
