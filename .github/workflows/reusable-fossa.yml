@@ -5,9 +5,6 @@
 name: FOSSA
 
 on:
-  push:
-    branches:
-      - '**'
   workflow_call:
     secrets:
       fossa-apikey:
@@ -18,7 +15,6 @@ permissions:
 
 jobs:
   fossa:
-    if: github.event_name != 'pull_request'
     name: Find license compliance and security issues
     runs-on: ubuntu-latest
     steps:
