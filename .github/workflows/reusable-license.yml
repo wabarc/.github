@@ -77,6 +77,6 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Check License Header
+      - name: "Check Dependencies' License"
         uses: apache/skywalking-eyes/dependency@438e4ea5682269933ea2c8b5608662e52af26959 # v0.4.0
 
