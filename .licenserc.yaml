@@ -1,0 +1,22 @@
+# Copyright 2020 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the GNU GPL v3
+# license that can be found in the LICENSE file.
+#
+header:
+  license:
+    spdx-id: MIT
+    copyright-owner: Wayback Archiver
+    content: |
+      Copyright 2020 Wayback Archiver. All rights reserved.
+      Use of this source code is governed by the MIT license
+      that can be found in the LICENSE file.
+
+  paths-ignore:
+    - '.github/ISSUE_TEMPLATE'
+    - '.github/PULL_REQUEST_TEMPLATE'
+    - '.gitattributes'
+    - '.semgrepignore'
+    - '**/*.md'
+    - 'LICENSE'
+
+  comment: on-failure
