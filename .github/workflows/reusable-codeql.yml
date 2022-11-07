@@ -27,6 +27,7 @@ permissions:
 
 jobs:
   codeql:
+    name: CodeQL analysis
     runs-on: ubuntu-latest
     permissions:
       security-events: write
