@@ -36,6 +36,8 @@ jobs:
             api.github.com:443
             uploads.github.com:443
             proxy.golang.org:443
+            sum.golang.org:443
+            storage.googleapis.com:443
 
       - name: Check out code base
         if: github.event_name == 'push'
