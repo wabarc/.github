@@ -1,0 +1,92 @@
+# Copyright 2020 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the MIT license
+# that can be found in the LICENSE file.
+
+name: Scorecards
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      publish-results:
+        type: boolean
+        default: true
+        description: "Publish the results for public repositories to enable scorecard badges."
+
+# Declare default permissions as read only.
+permissions:
+  contents: read
+
+jobs:
+  scorecards:
+    name: Security Scorecards
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' ||
+      github.head_ref == '${{ github.event.repository.default_branch }}'
+    permissions:
+      # Needed to upload the results to code-scanning dashboard.
+      security-events: write
+      # Used to receive a badge. (Upcoming feature)
+      id-token: write
+      actions: read
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            api.osv.dev:443
+            bestpractices.coreinfrastructure.org:443
+
+      - name: Check out code base
+        if: github.event_name == 'push' || github.event_name == 'schedule'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Run scorecards analysis
+        uses: ossf/scorecard-action@99c53751e09b9529366343771cc321ec74e9bd3d # v2.0.6
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          # (Optional) Read-only PAT token. Uncomment the `repo_token` line below if:
+          # - you want to enable the Branch-Protection check on a *public* repository, or
+          # - you are installing Scorecards on a *private* repository
+          # To create the PAT, follow the steps in https://github.com/ossf/scorecard-action#authentication-with-pat.
+          # repo_token: ${{ secrets.SCORECARD_READ_TOKEN }}
+
+          # Publish the results for public repositories to enable scorecard badges. For more details, see
+          # https://github.com/ossf/scorecard-action#publishing-results.
+          # For private repositories, `publish_results` will automatically be set to `false`, regardless
+          # of the value entered here.
+          publish_results: ${{ inputs.publish-results }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
+        with:
+          name: SARIF file
+          path: results.sarif
+
+      - name: Upload to code-scanning
+        uses: github/codeql-action/upload-sarif@c3b6fce4ee2ca25bc1066aa3bf73962fda0e8898 # v2.1.31
+        with:
+          sarif_file: results.sarif
+
