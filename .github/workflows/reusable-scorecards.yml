@@ -50,6 +50,8 @@ jobs:
             bestpractices.coreinfrastructure.org:443
             index.docker.io:443
             fulcio.sigstore.dev:443
+            auth.docker.io:443
+            sigstore-tuf-root.storage.googleapis.com:443
 
       - name: Check out code base
         if: github.event_name == 'push' || github.event_name == 'schedule'
