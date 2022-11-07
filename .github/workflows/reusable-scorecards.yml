@@ -16,7 +16,7 @@ on:
     inputs:
       publish-results:
         type: boolean
-        default: true
+        default: false
         description: "Publish the results for public repositories to enable scorecard badges."
 
 # Declare default permissions as read only.
