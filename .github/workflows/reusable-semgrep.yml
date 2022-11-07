@@ -1,0 +1,75 @@
+# Copyright 2020 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the MIT license
+# that can be found in the LICENSE file.
+
+name: Semgrep
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+    types: [ opened, synchronize, reopened ]
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    env:
+      SEMGREP_SEND_METRICS: 'off'
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            semgrep.dev:443
+
+      - name: Check out code base
+        if: github.event_name == 'push'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Run Bug Scan
+        uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+        with:
+          config: p/r2c-bug-scan
+
+      - name: Run CI
+        uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+        with:
+          config: p/r2c-ci
+
+      - name: Run Best Practices
+        uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+        with:
+          config: p/r2c-best-practices
+
+      - name: Run Security Audit
+        uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+        with:
+          config: p/r2c-security-audit
+
+      - name: Run GoSec
+        uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+        with:
+          config: p/gosec
+
