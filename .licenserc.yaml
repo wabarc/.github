@@ -18,5 +18,6 @@ header:
     - '.semgrepignore'
     - '**/*.md'
     - 'LICENSE'
+    - 'CODEOWNERS'
 
   comment: on-failure
