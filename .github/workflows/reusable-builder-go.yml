@@ -1,0 +1,142 @@
+# Copyright 2020 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the MIT license
+# that can be found in the LICENSE file.
+
+name: Golang Builder
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+  pull_request:
+    branches:
+      - '**'
+    types: [ opened, synchronize, reopened ]
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+  workflow_call:
+    inputs:
+      product:
+        type: string
+        required: true
+        description: 'Product or package name'
+      go-version:
+        type: string
+        default: '^1.19'
+        description: 'Golang version, defaults to ^1.19'
+      go-os:
+        type: string
+        default: 'linux'
+        description: 'Golang os, defaults to linux'
+      go-arch:
+        type: string
+        default: 'amd64'
+        description: 'Golang version, defaults to amd64'
+      go-arm:
+        type: string
+        description: 'Golang arm environment'
+      go-mips:
+        type: string
+        description: 'Golang mips environment'
+      go-mips64:
+        type: string
+        description: 'Golang mips64 environment'
+      go-mipsle:
+        type: string
+        description: 'Golang mipsle environment'
+      artifact-path:
+        type: string
+        required: true
+        description: 'Path to stores artifacts.'
+
+permissions:
+  contents: read
+
+jobs:
+  builder-go:
+    name: Golang Builder
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            proxy.golang.org:443
+            sum.golang.org:443
+            storage.googleapis.com:443
+
+      - name: Check out code base
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@c4a742cab115ed795e34d4513e2cf7d472deb55f # v3.3.1
+        with:
+          go-version: ${{ inputs.go-version }}
+
+      - name: Cache go module
+        uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7 # v3.0.11
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            ~/Library/Caches/go-build
+            ~\AppData\Local\go-build
+            ~\go\pkg\mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Get dependencies
+        run: |
+          go get -v -t -d ./...
+
+      - name: Build binary
+        id: builder
+        run: |
+          GOOS=${{ inputs.go-os }}
+          GOARCH=${{ inputs.go-arch }}
+          GOARM=${{ inputs.go-arm }}
+          GOMIPS=${{ inputs.go-mips }}
+          GOMIPS64=${{ inputs.go-mips64 }}
+          GOMIPSLE=${{ inputs.go-mipsle }}
+          ARGS="${GOOS}-${GOARCH}"
+          if [[ -n "${GOARM}" ]]; then
+            ARGS="${ARGS}v${GOARM}"
+          elif [[ -n "${GOMIPS}" ]]; then
+            ARGS="${ARGS}-${GOMIPS}"
+          elif [[ -n "${GOMIPS64}" ]]; then
+            ARGS="${ARGS}-${GOMIPS64}"
+          elif [[ -n "${GOMIPSLE}" ]]; then
+            ARGS="${ARGS}-${GOMIPSLE}"
+          fi
+          make ${ARGS}
+          echo "filename=${{ inputs.product }}-${ARGS}" >> $GITHUB_OUTPUT
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
+        with:
+          name: ${{ steps.builder.outputs.filename }}
+          path: ${{ inputs.artifact-path }}
+          if-no-files-found: error
