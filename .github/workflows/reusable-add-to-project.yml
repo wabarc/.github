@@ -1,0 +1,74 @@
+# Copyright 2020 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the MIT license
+# that can be found in the LICENSE file.
+
+name: Projects
+
+on:
+  issues:
+    types:
+      - opened
+      - transferred
+  pull_request:
+    types:
+      - opened
+  workflow_call:
+    inputs:
+      project-url:
+        type: string
+        default: 'https://github.com/orgs/wabarc/projects/6'
+        description: 'URL of the project to add issues or pull requests to'
+    secrets:
+      github-token:
+        required: true
+
+env:
+  PROJECT_URL: https://github.com/orgs/wabarc/projects/6
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  add-issue-to-project:
+    name: Add Issue or Pull Request to Project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+
+      - name: Check out code base
+        if: github.event_name == 'push'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Add to Project
+        if: github.event == 'workflow_call'
+        uses: actions/add-to-project@a9f041ddd462ed185893ea1024cec954f50dbe42 # v0.3.0
+        with:
+          project-url: ${{ inputs.project-url }}
+          github-token: ${{ secrets.github-token }}
+
+      - name: Add to Project
+        if: github.event != 'workflow_call'
+        uses: actions/add-to-project@a9f041ddd462ed185893ea1024cec954f50dbe42 # v0.3.0
+        with:
+          project-url: ${{ env.PROJECT_URL }}
+          github-token: ${{ secrets.GH_PROJECTS_ACTION_TOKEN }}
