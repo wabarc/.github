@@ -1,0 +1,83 @@
+# Copyright 2020 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the MIT license
+# that can be found in the LICENSE file.
+
+name: Debian Package Builder
+
+on:
+  workflow_call:
+    inputs:
+      go-arch:
+        type: string
+        default: 'amd64'
+        description: 'Golang version, defaults to amd64'
+      go-arm:
+        type: string
+        description: 'Golang arm environment'
+      artifact-path:
+        type: string
+        required: true
+        description: 'Path to stores artifacts.'
+
+env:
+  WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+
+permissions:
+  contents: read
+
+jobs:
+  debian-builder:
+    name: Debian Package Builder
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            deb.debian.org:443
+            auth.docker.io:443
+            registry-1.docker.io:443
+            production.cloudflare.docker.com:443
+
+      - name: Check out code base
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18 # v2.1.0
+
+      - name: Build Debian package
+        id: builder
+        run: |
+          GOARCH="${{ inputs.go-arch }}"
+          GOARM="${{ inputs.go-arm }}"
+          TARGET="${GOARCH}"
+          if [[ -n "${GOARM}" ]]; then
+            TARGET="${GOARCH}v${GOARM}"
+          fi
+          PKG_ARCH="${TARGET//v8}"
+          PKG_ARCH="${PKG_ARCH//32}"
+          make debian DEB_IMG_ARCH=${TARGET} PKG_ARCH=${PKG_ARCH}
+          echo "filename=${{ env.PRODUCT }}-deb-${PKG_ARCH}" >> $GITHUB_OUTPUT
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
+        with:
+          name: ${{ steps.builder.outputs.filename }}
+          path: ${{ inputs.artifact-path }}
+          if-no-files-found: error
