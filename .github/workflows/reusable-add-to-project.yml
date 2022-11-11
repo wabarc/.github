@@ -22,6 +22,9 @@ on:
       github-token:
         required: true
 
+env:
+  PROJECT_URL: https://github.com/orgs/wabarc/projects/6
+
 permissions:
   contents: read
   issues: read
@@ -56,8 +59,16 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Add Issue to Project
+      - name: Add to Project
+        if: github.event == 'workflow_call'
         uses: actions/add-to-project@a9f041ddd462ed185893ea1024cec954f50dbe42 # v0.3.0
         with:
           project-url: ${{ inputs.project-url }}
           github-token: ${{ secrets.github-token }}
+
+      - name: Add to Project
+        if: github.event != 'workflow_call'
+        uses: actions/add-to-project@a9f041ddd462ed185893ea1024cec954f50dbe42 # v0.3.0
+        with:
+          project-url: ${{ env.PROJECT_URL }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
