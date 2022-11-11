@@ -7,6 +7,10 @@ name: Debian Package Builder
 on:
   workflow_call:
     inputs:
+      product:
+        type: string
+        required: true
+        description: 'Product or package name'
       go-arch:
         type: string
         default: 'amd64'
@@ -20,6 +24,7 @@ on:
         description: 'Path to stores artifacts.'
 
 env:
+  PRODUCT: ${{ inputs.product }}
   WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
 
 permissions:
