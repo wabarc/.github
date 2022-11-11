@@ -71,4 +71,4 @@ jobs:
         uses: actions/add-to-project@a9f041ddd462ed185893ea1024cec954f50dbe42 # v0.3.0
         with:
           project-url: ${{ env.PROJECT_URL }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_PROJECTS_ACTION_TOKEN }}
