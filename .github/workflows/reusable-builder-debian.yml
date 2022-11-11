@@ -22,10 +22,9 @@ on:
         type: string
         required: true
         description: 'Path to stores artifacts.'
-
-env:
-  PRODUCT: ${{ inputs.product }}
-  WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+      wayback-ipfs-apikey:
+        type: string
+        description: 'Managed IPFS credential for distribution binaries.'
 
 permissions:
   contents: read
@@ -34,6 +33,8 @@ jobs:
   debian-builder:
     name: Debian Package Builder
     runs-on: ubuntu-latest
+    env:
+      WAYBACK_IPFS_APIKEY: ${{ inputs.wayback-ipfs-apikey }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
