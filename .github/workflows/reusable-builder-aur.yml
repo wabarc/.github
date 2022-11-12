@@ -16,6 +16,7 @@ on:
         required: true
         description: 'Building package parameters.'
       artifact-path:
+        type: string
         required: true
         description: 'Path to stores artifacts.'
     secrets:
