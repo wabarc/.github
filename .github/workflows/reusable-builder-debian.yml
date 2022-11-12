@@ -34,7 +34,7 @@ jobs:
     name: Debian Package Builder
     runs-on: ubuntu-latest
     env:
-      WAYBACK_IPFS_APIKEY: ${{ inputs.wayback-ipfs-apikey }}
+      WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
@@ -82,7 +82,7 @@ jobs:
           PKG_ARCH="${TARGET//v8}"
           PKG_ARCH="${PKG_ARCH//32}"
           make debian DEB_IMG_ARCH=${TARGET} PKG_ARCH=${PKG_ARCH}
-          echo "filename=${{ env.PRODUCT }}-deb-${PKG_ARCH}" >> $GITHUB_OUTPUT
+          echo "filename=${{ inputs.product }}-deb-${PKG_ARCH}" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts
         uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
