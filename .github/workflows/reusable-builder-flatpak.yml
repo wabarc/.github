@@ -1,0 +1,87 @@
+# Copyright 2020 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the MIT license
+# that can be found in the LICENSE file.
+
+name: Flatpak Package Builder
+
+on:
+  workflow_call:
+    inputs:
+      owner:
+        type: string
+        default: wabarc
+        description: 'Product or package owner'
+      product:
+        type: string
+        required: true
+        description: 'Product or package name'
+      version:
+        type: string
+        required: true
+        description: 'Version of flatpak.'
+      artifact-path:
+        type: string
+        required: true
+        description: 'Path to stores artifacts.'
+    secrets:
+      wayback-ipfs-apikey:
+        description: 'Managed IPFS credential for distribution binaries.'
+
+permissions:
+  contents: read
+
+jobs:
+  flatpak-builder:
+    name: Flatpak Package Builder
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: audit
+          disable-telemetry: true
+
+      - name: Check out code base
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Packaging flatpak
+        env:
+          WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
+        run: |
+          VERSION="${{ inputs.version }}"
+          PRODUCT="${{ inputs.product }}"
+          OWNER="${{ inputs.owner }}"
+          BUNDLE="org.${OWNER}.${PRODUCT}_${VERSION}_x86_64.flatpak"
+          MANIFEST_PATH="${GITHUB_WORKSPACE}/build/flatpak/org.${OWNER}.${PRODUCT}.yml"
+          RUNTIME_REPO="https://flathub.org/repo/flathub.flatpakrepo"
+          APP_ID="org.${OWNER}.${PRODUCT}"
+          BRANCH="master"
+
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install -y --noninteractive flathub org.freedesktop.Platform//20.08 org.freedesktop.Sdk//20.08
+
+          make build
+          mv "build/binary/${PRODUCT}" "build/flatpak/${PRODUCT}"
+
+          flatpak-builder --user --disable-rofiles-fuse --repo=repo --force-clean flatpak_app ${MANIFEST_PATH} --install-deps-from=flathub
+          flatpak build-bundle repo ${BUNDLE} --runtime-repo=${RUNTIME_REPO} ${APP_ID} ${BRANCH}
+          mv "${GITHUB_WORKSPACE}/org.${OWNER}.${PRODUCT}_${VERSION}_x86_64.flatpak" "${GITHUB_WORKSPACE}/org.${OWNER}.${PRODUCT}-${VERSION}.x86_64.flatpak"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
+        with:
+          name: ${{ inputs.product }}-flatpak
+          path: ${{ inputs.artifact-path }}
+          if-no-files-found: error
