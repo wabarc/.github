@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   aur-builder:
-    name: RPM Package Builder
+    name: AUR Package Builder
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
