@@ -1,0 +1,103 @@
+# Copyright 2020 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the MIT license
+# that can be found in the LICENSE file.
+
+name: Snap Package Builder
+
+on:
+  workflow_call:
+    inputs:
+      product:
+        type: string
+        required: true
+        description: 'Product or package name'
+      channel:
+        type: string
+        default: edge
+        description: 'Release of a snap is installed and tracked for updates.'
+      publish:
+        type: boolean
+        default: false
+        description: 'Whether or not to publish a snap.'
+    secrets:
+      snapcraft-token:
+        description: 'The login data for the Snap Store produced with "snapcraft export-login"'
+      wayback-ipfs-apikey:
+        description: 'Managed IPFS credential for distribution binaries.'
+
+permissions:
+  contents: read
+
+jobs:
+  snap-builder:
+    name: Snap Package Builder
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            auth.docker.io:443
+            registry-1.docker.io:443
+            production.cloudflare.docker.com:443
+            storage.googleapis.com:443
+            proxy.golang.org:443
+            sum.golang.org:443
+            snapcraft.io:443
+            api.snapcraft.io:443
+            archive.ubuntu.com:443
+            security.ubuntu.com:443
+            cloud-images.ubuntu.com:443
+            canonical-bos01.cdn.snapcraftcontent.com:443
+            canonical-lgw01.cdn.snapcraftcontent.com:443
+            us.lxd.images.canonical.com:443
+            images.linuxcontainers.org:443
+
+      - name: Check out code base
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          submodules: true
+          persist-credentials: false
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          submodules: true
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
+
+      - id: builder
+        name: Build Snap
+        uses: snapcore/action-build@989705ff968611277779118c9990c34af832840d # v1.1.1
+        with:
+          snapcraft-channel: ${{ inputs.channel }}
+        env:
+          WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
+
+      - name: Release Snap
+        uses: snapcore/action-publish@0a8d537ae06f4a292e8b4ef1084cd5631b3c6871 # v1.1.1
+        if: ${{ inputs.publish }}
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.snapcraft-token }}
+        with:
+          store_login: ${{ secrets.snapcraft-token }}
+          snap: ${{ steps.build.outputs.snap }}
+          release: ${{ inputs.channel }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
+        with:
+          name: ${{ inputs.product }}-snap
+          path: ${{ steps.builder.outputs.snap }}
+          if-no-files-found: error
