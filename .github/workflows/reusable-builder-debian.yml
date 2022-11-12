@@ -34,8 +34,6 @@ jobs:
   debian-builder:
     name: Debian Package Builder
     runs-on: ubuntu-latest
-    env:
-      WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
@@ -73,9 +71,11 @@ jobs:
 
       - name: Build Debian package
         id: builder
+        env:
+          WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
+          GOARCH: ${{ inputs.go-arch }}
+          GOARM: ${{ inputs.go-arm }}
         run: |
-          GOARCH="${{ inputs.go-arch }}"
-          GOARM="${{ inputs.go-arm }}"
           TARGET="${GOARCH}"
           if [[ -n "${GOARM}" ]]; then
             TARGET="${GOARCH}v${GOARM}"
