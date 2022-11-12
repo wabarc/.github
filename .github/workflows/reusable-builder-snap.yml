@@ -19,10 +19,6 @@ on:
         type: boolean
         default: false
         description: 'Whether or not to publish a snap.'
-      artifact-path:
-        type: string
-        required: true
-        description: 'Path to stores artifacts.'
     secrets:
       snapcraft-token:
         description: 'The login data for the Snap Store produced with "snapcraft export-login"'
