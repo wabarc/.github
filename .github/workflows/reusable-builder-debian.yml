@@ -24,7 +24,6 @@ on:
         description: 'Path to stores artifacts.'
     secrets:
       wayback-ipfs-apikey:
-        required: true
         description: 'Managed IPFS credential for distribution binaries.'
 
 permissions:
