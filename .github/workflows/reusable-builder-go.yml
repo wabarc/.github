@@ -54,6 +54,9 @@ on:
         type: string
         required: true
         description: 'Path to stores artifacts.'
+    secrets:
+      wayback-ipfs-apikey:
+        description: 'Managed IPFS credential for distribution binaries.'
 
 permissions:
   contents: read
@@ -114,13 +117,15 @@ jobs:
 
       - name: Build binary
         id: builder
+        env:
+          WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
+          GOOS: ${{ inputs.go-os }}
+          GOARCH: ${{ inputs.go-arch }}
+          GOARM: ${{ inputs.go-arm }}
+          GOMIPS: ${{ inputs.go-mips }}
+          GOMIPS64: ${{ inputs.go-mips64 }}
+          GOMIPSLE: ${{ inputs.go-mipsle }}
         run: |
-          GOOS=${{ inputs.go-os }}
-          GOARCH=${{ inputs.go-arch }}
-          GOARM=${{ inputs.go-arm }}
-          GOMIPS=${{ inputs.go-mips }}
-          GOMIPS64=${{ inputs.go-mips64 }}
-          GOMIPSLE=${{ inputs.go-mipsle }}
           ARGS="${GOOS}-${GOARCH}"
           if [[ -n "${GOARM}" ]]; then
             ARGS="${ARGS}v${GOARM}"
