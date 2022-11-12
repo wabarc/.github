@@ -34,18 +34,8 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
         with:
-          egress-policy: block
+          egress-policy: audit
           disable-telemetry: true
-          allowed-endpoints: >
-            github.com:443
-            api.github.com:443
-            auth.docker.io:443
-            registry-1.docker.io:443
-            production.cloudflare.docker.com:443
-            storage.googleapis.com:443
-            proxy.golang.org:443
-            sum.golang.org:443
-            dl-cdn.alpinelinux.org:443
 
       - name: Check out code base
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
