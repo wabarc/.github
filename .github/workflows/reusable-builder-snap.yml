@@ -92,7 +92,7 @@ jobs:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.snapcraft-token }}
         with:
           store_login: ${{ secrets.snapcraft-token }}
-          snap: ${{ steps.build.outputs.snap }}
+          snap: ${{ steps.builder.outputs.snap }}
           release: ${{ inputs.channel }}
 
       - name: Upload artifacts
