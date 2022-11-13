@@ -54,6 +54,7 @@ jobs:
             snapcraft.io:443
             api.snapcraft.io:443
             dashboard.snapcraft.io:443
+            login.ubuntu.com:443
             archive.ubuntu.com:443
             security.ubuntu.com:443
             cloud-images.ubuntu.com:443
