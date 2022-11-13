@@ -58,6 +58,7 @@ jobs:
             archive.ubuntu.com:443
             security.ubuntu.com:443
             cloud-images.ubuntu.com:443
+            storage.snapcraftcontent.com:443
             canonical-bos01.cdn.snapcraftcontent.com:443
             canonical-lgw01.cdn.snapcraftcontent.com:443
             uk.lxd.images.canonical.com:443
