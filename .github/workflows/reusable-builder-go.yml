@@ -29,7 +29,7 @@ on:
       release:
         type: boolean
         default: false
-        description: 'todo'
+        description: 'Whether or not to archive binaries for release.'
       go-version:
         type: string
         default: '^1.19'
