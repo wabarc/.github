@@ -36,6 +36,8 @@ jobs:
           disable-telemetry: true
           allowed-endpoints: >
             github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
 
       - name: Check out code base
         if: github.event_name == 'push'
