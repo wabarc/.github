@@ -17,8 +17,7 @@ on:
         description: 'Product or package name'
       version:
         type: string
-        required: true
-        description: 'Version of flatpak.'
+        description: 'Version of flatpak, defaults to git ref.'
       params:
         type: string
         required: true
@@ -73,10 +72,12 @@ jobs:
       - name: Packaging flatpak
         env:
           WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
+          VERSION: ${{ inputs.version }}
+          PRODUCT: ${{ inputs.product }}
+          OWNER: ${{ inputs.owner }}
         run: |
-          VERSION="${{ inputs.version }}"
-          PRODUCT="${{ inputs.product }}"
-          OWNER="${{ inputs.owner }}"
+          REF="$(git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')"
+          VERSION="${VERSION:-$REF}"
           BUNDLE="org.${OWNER}.${PRODUCT}_${VERSION}_x86_64.flatpak"
           MANIFEST_PATH="${GITHUB_WORKSPACE}/build/flatpak/org.${OWNER}.${PRODUCT}.yml"
           RUNTIME_REPO="https://flathub.org/repo/flathub.flatpakrepo"
