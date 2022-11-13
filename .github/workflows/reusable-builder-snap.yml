@@ -19,6 +19,10 @@ on:
         type: boolean
         default: false
         description: 'Whether or not to publish a snap.'
+      release:
+        type: boolean
+        default: false
+        description: 'Whether or not to define a workflow called is releasing.'
     secrets:
       snapcraft-token:
         description: 'The login data for the Snap Store produced with "snapcraft export-login"'
@@ -78,6 +82,13 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
 
+      - name: Replace version (for release)
+        shell: bash
+        if: ${{ inputs.release }}
+        run: |
+          version=$(git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')
+          sed -i "s/version: 'git'/version: '${version}'/g" snapcraft.yaml
+
       - id: builder
         name: Build Snap
         uses: snapcore/action-build@989705ff968611277779118c9990c34af832840d # v1.1.1
@@ -86,7 +97,7 @@ jobs:
         env:
           WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
 
-      - name: Release Snap
+      - name: Publish Snap
         uses: snapcore/action-publish@0a8d537ae06f4a292e8b4ef1084cd5631b3c6871 # v1.1.1
         if: ${{ inputs.publish }}
         env:
