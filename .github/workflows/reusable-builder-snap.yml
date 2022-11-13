@@ -53,6 +53,7 @@ jobs:
             sum.golang.org:443
             snapcraft.io:443
             api.snapcraft.io:443
+            dashboard.snapcraft.io:443
             archive.ubuntu.com:443
             security.ubuntu.com:443
             cloud-images.ubuntu.com:443
