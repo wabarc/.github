@@ -1,0 +1,86 @@
+# Copyright 2020 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the MIT license
+# that can be found in the LICENSE file.
+
+name: AUR Package Builder
+
+on:
+  workflow_call:
+    inputs:
+      owner:
+        type: string
+        default: 'wabarc'
+        description: 'Product or package owner'
+      product:
+        type: string
+        required: true
+        description: 'Product or package name'
+      type:
+        type: string
+        required: true
+        description: 'Package type, supported: deb, rpm.'
+    secrets:
+      fury-token:
+        description: 'Credential of Gemfury.'
+
+permissions:
+  contents: read
+
+jobs:
+  aur-builder:
+    name: AUR Package Builder
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            push.fury.io:443
+
+      - name: Check out code base
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          submodules: true
+          persist-credentials: false
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          submodules: true
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@9782bd6a9848b53b110e712e20e42d89988822b7 # v3.0.1
+        with:
+          name: ${{ inputs.product }}
+          path: ${{ inputs.product }}
+
+      - name: List files
+        run: ls -l "${{ github.workspace }}/${{ inputs.product }}/*"
+
+      - name: Publish APT Repository
+        if: contains(${{ inputs.type }}, 'deb')
+        env:
+          FURY_TOKEN: ${{ secrets.fury-token }}
+        run: |
+          owner=${{ inputs.owner }}
+          path=${{ inputs.product }}
+          for f in ./${path}/*.deb; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/$owner/; done
+
+      - name: Publish RPM Repository
+        if: contains(${{ inputs.type }}, 'rpm')
+        env:
+          FURY_TOKEN: ${{ secrets.fury-token }}
+        run: |
+          owner=${{ inputs.owner }}
+          path=${{ inputs.product }}
+          for f in ./${path}/*.deb; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/$owner/; done
