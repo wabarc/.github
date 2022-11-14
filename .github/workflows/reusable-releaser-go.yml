@@ -15,6 +15,10 @@ on:
         type: boolean
         default: false
         description: 'Generate configuration file for "bina.egoist.dev".'
+    outputs:
+      release-note:
+        description: 'Release notes formatted as markdown.'
+        value: ${{ jobs.go-releaser.outputs.release-note }}
 
 permissions:
   contents: read
@@ -27,6 +31,8 @@ jobs:
       ARTIFACT_DIR: artifacts
     permissions:
       contents: write
+    outputs:
+      release-note: ${{ steps.misc.outputs.release-note }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
@@ -92,7 +98,8 @@ jobs:
           version="$(git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')"
           echo "${digest}" > "${product}-${version}-checksums.txt"
 
-      - name: Generate Git log
+      - name: Generate Release Notes
+        id: misc
         run: |
           git fetch origin +refs/tags/*:refs/tags/*
           echo "Current Tag: ${GITHUB_REF}"
@@ -105,6 +112,12 @@ jobs:
           echo -e "*Release ${GITVER}* #wayback\n" > release-note.md
           cut -c9- gittaglogs.txt | sed -e 's/^/- /' | sed -e 's/\"/\\"/g' >> release-note.md
           echo -e "\n${MORE}" | tee -a release-note.md gittaglogs.txt > /dev/null
+
+          delimiter="$(openssl rand -hex 8)"
+          echo "release-note<<${delimiter}" >> "${GITHUB_OUTPUT}"
+          echo "$(cat release-note.md)" >> "${GITHUB_OUTPUT}"
+          echo "${delimiter}" >> "${GITHUB_OUTPUT}"
+
           # Append digests
           echo '
           **Digests in this release:**
