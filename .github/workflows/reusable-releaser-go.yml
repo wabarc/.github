@@ -130,7 +130,7 @@ jobs:
 
       - name: Create Release
         uses: softprops/action-gh-release@50195ba7f6f93d1ac97ba8332a178e008ad176aa
-        if: !${{ inputs.generate-bina }}
+        if: ${{ inputs.generate-bina == false }}
         with:
           body_path: gittaglogs.txt
           files: |
