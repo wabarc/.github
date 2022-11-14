@@ -77,8 +77,8 @@ jobs:
           echo '##[info] list files recursively in staging directory'
           ls -R .
           # matching all binaries and move to destination directory.
-          find ${exprdeb} -type f -print0 | xargs -0 -I {} mv {} ${destdir}
-          find ${exprrpm} -type f -print0 | xargs -0 -I {} mv {} ${destdir}
+          find . -name ${exprdeb} -type f -print0 | xargs -0 -I {} mv {} ${destdir}
+          find . -name ${exprrpm} -type f -print0 | xargs -0 -I {} mv {} ${destdir}
           echo '##[info] list files in destination directory'
           ls -R $destdir
           echo "artifact-dir=${destdir}" >> "${GITHUB_OUTPUT}"
