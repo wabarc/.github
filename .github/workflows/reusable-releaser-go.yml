@@ -150,12 +150,3 @@ jobs:
             ${{ steps.artifact.outputs.artifact-dir }}/*${{ inputs.product }}*
           prerelease: true
           draft: false
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
-        with:
-          name: ${{ inputs.product }}
-          path: |
-            ${{ steps.artifact.outputs.artifact-dir }}/*${{ inputs.product }}*
-            release-note.md
-            bina.json
