@@ -84,7 +84,7 @@ jobs:
           echo "artifact-dir=${destdir}" >> "${GITHUB_OUTPUT}"
 
       - name: List files
-        run: ls -l "${{ steps.artifact.outputs.artifact-dir }}/*"
+        run: ls -l ${{ steps.artifact.outputs.artifact-dir }}
 
       - name: Publish APT Repository
         if: contains(inputs.type, 'deb')
