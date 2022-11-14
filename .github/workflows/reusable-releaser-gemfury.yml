@@ -93,8 +93,7 @@ jobs:
         working-directory: ${{ steps.artifact.outputs.artifact-dir }}
         run: |
           owner=${{ inputs.owner }}
-          path=${{ inputs.product }}
-          for f in ./${path}/*.deb; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/$owner/; done
+          for f in ./*.deb; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/$owner/; done
 
       - name: Publish RPM Repository
         if: contains(inputs.type, 'rpm')
@@ -103,5 +102,4 @@ jobs:
         working-directory: ${{ steps.artifact.outputs.artifact-dir }}
         run: |
           owner=${{ inputs.owner }}
-          path=${{ inputs.product }}
-          for f in ./${path}/*.deb; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/$owner/; done
+          for f in ./*.deb; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/$owner/; done
