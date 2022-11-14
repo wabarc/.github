@@ -143,6 +143,6 @@ jobs:
         with:
           name: ${{ inputs.product }}
           path: |
-            ${{ inputs.product }}/${{ inputs.product }}*
+            ${{ steps.artifact.outputs.artifact-dir }}/*${{ inputs.product }}*
             release-note.md
             bina.json
