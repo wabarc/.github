@@ -30,6 +30,8 @@ jobs:
   gemfury-releaser:
     name: Gemfury Package Releaser
     runs-on: ubuntu-latest
+    env:
+      ARTIFACT_DIR: artifacts
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
@@ -61,16 +63,34 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@9782bd6a9848b53b110e712e20e42d89988822b7 # v3.0.1
         with:
-          name: ${{ inputs.product }}
-          path: ${{ inputs.product }}
+          path: ${{ inputs.product }}-staging
+
+      - name: Restructure artifacts
+        working-directory: ${{ inputs.product }}-staging
+        id: artifact
+        run: |
+          set -eu pipefail
+          destdir="${{ github.workspace }}/${{ env.ARTIFACT_DIR }}"
+          exprdeb="*${{ inputs.product }}*.deb"
+          exprrpm="*${{ inputs.product }}*.rpm"
+          mkdir -p $destdir
+          echo '##[info] list files recursively in staging directory'
+          ls -R .
+          # matching all binaries and move to destination directory.
+          find ${exprdeb} -type f -print0 | xargs -0 -I {} mv {} ${destdir}
+          find ${exprrpm} -type f -print0 | xargs -0 -I {} mv {} ${destdir}
+          echo '##[info] list files in destination directory'
+          ls -R $destdir
+          echo "artifact-dir=${destdir}" >> "${GITHUB_OUTPUT}"
 
       - name: List files
-        run: ls -l "${{ github.workspace }}/${{ inputs.product }}/*"
+        run: ls -l "${{ steps.artifact.outputs.artifact-dir }}/*"
 
       - name: Publish APT Repository
         if: contains(${{ inputs.type }}, 'deb')
         env:
           FURY_TOKEN: ${{ secrets.fury-token }}
+        working-directory: ${{ steps.artifact.outputs.artifact-dir }}
         run: |
           owner=${{ inputs.owner }}
           path=${{ inputs.product }}
@@ -80,6 +100,7 @@ jobs:
         if: contains(${{ inputs.type }}, 'rpm')
         env:
           FURY_TOKEN: ${{ secrets.fury-token }}
+        working-directory: ${{ steps.artifact.outputs.artifact-dir }}
         run: |
           owner=${{ inputs.owner }}
           path=${{ inputs.product }}
