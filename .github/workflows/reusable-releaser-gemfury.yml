@@ -2,7 +2,7 @@
 # Use of this source code is governed by the MIT license
 # that can be found in the LICENSE file.
 
-name: AUR Package Builder
+name: Gemfury Package Releaser
 
 on:
   workflow_call:
@@ -27,8 +27,8 @@ permissions:
   contents: read
 
 jobs:
-  aur-builder:
-    name: AUR Package Builder
+  gemfury-releaser:
+    name: Gemfury Package Releaser
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
