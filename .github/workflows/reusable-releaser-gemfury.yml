@@ -87,7 +87,7 @@ jobs:
         run: ls -l "${{ steps.artifact.outputs.artifact-dir }}/*"
 
       - name: Publish APT Repository
-        if: contains(${{ inputs.type }}, 'deb')
+        if: contains(inputs.type, 'deb')
         env:
           FURY_TOKEN: ${{ secrets.fury-token }}
         working-directory: ${{ steps.artifact.outputs.artifact-dir }}
@@ -97,7 +97,7 @@ jobs:
           for f in ./${path}/*.deb; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/$owner/; done
 
       - name: Publish RPM Repository
-        if: contains(${{ inputs.type }}, 'rpm')
+        if: contains(inputs.type, 'rpm')
         env:
           FURY_TOKEN: ${{ secrets.fury-token }}
         working-directory: ${{ steps.artifact.outputs.artifact-dir }}
