@@ -1,0 +1,152 @@
+# Copyright 2020 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the MIT license
+# that can be found in the LICENSE file.
+
+name: Golang Package Releaser
+
+on:
+  workflow_call:
+    inputs:
+      product:
+        type: string
+        required: true
+        description: 'Product or package name'
+      generate-bina:
+        type: boolean
+        default: false
+        description: 'Generate configuration file for "bina.egoist.dev".'
+    outputs:
+      release-note:
+        description: 'Release notes formatted as markdown.'
+        value: ${{ jobs.go-releaser.outputs.release-note }}
+
+permissions:
+  contents: read
+
+jobs:
+  go-releaser:
+    name: Golang Package Releaser
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACT_DIR: artifacts
+    permissions:
+      contents: write
+    outputs:
+      release-note: ${{ steps.misc.outputs.release-note }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            uploads.github.com:443
+
+      - name: Check out code base
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          submodules: true
+          persist-credentials: false
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          submodules: true
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@9782bd6a9848b53b110e712e20e42d89988822b7 # v3.0.1
+        with:
+          path: ${{ inputs.product }}-staging
+
+      - name: Restructure artifacts
+        working-directory: ${{ inputs.product }}-staging
+        id: artifact
+        run: |
+          set -eux pipefail
+          destdir="${{ github.workspace }}/${{ env.ARTIFACT_DIR }}"
+          expr="*${{ inputs.product }}*"
+          mkdir -p $destdir
+          echo '##[info] list files recursively in staging directory'
+          ls -R .
+          # matching all binaries and move to destination directory.
+          find ${expr} -type f -print0 | xargs -0 -I {} mv {} ${destdir}
+          echo '##[info] list files in destination directory'
+          ls -R $destdir
+          echo "artifact-dir=${destdir}" >> "${GITHUB_OUTPUT}"
+
+      - name: Generate digests
+        id: digest
+        working-directory: ${{ steps.artifact.outputs.artifact-dir }}
+        run: |
+          product="${{ inputs.product }}"
+          digest="$(find *${product}* -type f -exec sha256sum {} +)"
+
+          delimiter="$(openssl rand -hex 8)"
+          echo "checksums<<${delimiter}" >> "${GITHUB_OUTPUT}"
+          echo "${digest}" >> "${GITHUB_OUTPUT}"
+          echo "${delimiter}" >> "${GITHUB_OUTPUT}"
+
+          # Write digest to file
+          version="$(git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')"
+          echo "${digest}" > "${product}-${version}-checksums.txt"
+
+      - name: Generate Release Notes
+        id: misc
+        run: |
+          git fetch origin +refs/tags/*:refs/tags/*
+          echo "Current Tag: ${GITHUB_REF}"
+          git checkout ${GITHUB_REF} -b release-log
+          GITVER=$(git describe --tags)
+          PREVVER=$(git describe --tags --abbrev=0 ${GITVER}~1)
+          git log --oneline ${PREVVER}..${GITVER} > gittaglogs.txt
+
+          MORE=$(echo "See full [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/CHANGELOG.md)")
+          echo -e "*Release ${GITVER}* #wayback\n" > release-note.md
+          cut -c9- gittaglogs.txt | sed -e 's/^/- /' | sed -e 's/\"/\\"/g' >> release-note.md
+          echo -e "\n${MORE}" | tee -a release-note.md gittaglogs.txt > /dev/null
+
+          delimiter="$(openssl rand -hex 8)"
+          echo "release-note<<${delimiter}" >> "${GITHUB_OUTPUT}"
+          echo "$(cat release-note.md)" >> "${GITHUB_OUTPUT}"
+          echo "${delimiter}" >> "${GITHUB_OUTPUT}"
+
+          # Append digests
+          echo '
+          **Digests in this release:**
+          ```
+          ${{ steps.digest.outputs.checksums }}
+          ```
+          ' >> gittaglogs.txt
+
+      - name: Generate bina.jon
+        if: ${{ inputs.generate-bina }}
+        run: make bina
+
+      - name: Create Release (with bina)
+        uses: softprops/action-gh-release@50195ba7f6f93d1ac97ba8332a178e008ad176aa
+        if: ${{ inputs.generate-bina }}
+        with:
+          body_path: gittaglogs.txt
+          files: |
+            ${{ steps.artifact.outputs.artifact-dir }}/*${{ inputs.product }}*
+            bina.json
+          prerelease: true
+          draft: false
+
+      - name: Create Release
+        uses: softprops/action-gh-release@50195ba7f6f93d1ac97ba8332a178e008ad176aa
+        if: ${{ inputs.generate-bina == false }}
+        with:
+          body_path: gittaglogs.txt
+          files: |
+            ${{ steps.artifact.outputs.artifact-dir }}/*${{ inputs.product }}*
+          prerelease: true
+          draft: false

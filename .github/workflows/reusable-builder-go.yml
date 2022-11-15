@@ -26,6 +26,10 @@ on:
         type: string
         required: true
         description: 'Product or package name'
+      release:
+        type: boolean
+        default: false
+        description: 'Whether or not to define a workflow called is releasing.'
       go-version:
         type: string
         default: '^1.19'
@@ -126,18 +130,23 @@ jobs:
           GOMIPS64: ${{ inputs.go-mips64 }}
           GOMIPSLE: ${{ inputs.go-mipsle }}
         run: |
-          ARGS="${GOOS}-${GOARCH}"
+          TARGET="${GOOS}-${GOARCH}"
           if [[ -n "${GOARM}" ]]; then
-            ARGS="${ARGS}v${GOARM}"
+            TARGET="${TARGET}v${GOARM}"
           elif [[ -n "${GOMIPS}" ]]; then
-            ARGS="${ARGS}-${GOMIPS}"
+            TARGET="${TARGET}-${GOMIPS}"
           elif [[ -n "${GOMIPS64}" ]]; then
-            ARGS="${ARGS}-${GOMIPS64}"
+            TARGET="${TARGET}-${GOMIPS64}"
           elif [[ -n "${GOMIPSLE}" ]]; then
-            ARGS="${ARGS}-${GOMIPSLE}"
+            TARGET="${TARGET}-${GOMIPSLE}"
           fi
-          make ${ARGS}
-          echo "filename=${{ inputs.product }}-${ARGS}" >> $GITHUB_OUTPUT
+          make ${TARGET}
+          echo "filename=${{ inputs.product }}-${TARGET}" >> $GITHUB_OUTPUT
+          echo "target=${TARGET}" >> $GITHUB_OUTPUT
+
+      - name: Archive binary (for release)
+        if: ${{ inputs.release }}
+        run: make TARGET=${{ steps.builder.outputs.target }} releases
 
       - name: Upload artifacts
         uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
