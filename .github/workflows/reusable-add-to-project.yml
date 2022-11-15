@@ -37,6 +37,11 @@ jobs:
   add-issue-to-project:
     name: Add Issue or Pull Request to Project
     runs-on: ubuntu-latest
+    # pull_request_target: Only "dependabot[bot]" is allowed to access secrets.
+    # pull_request: All other forks are running without access to secrets.
+    if: >
+      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') ||
+      (github.event_name != 'pull_request_target' && github.actor != 'dependabot[bot]')
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
@@ -48,7 +53,7 @@ jobs:
             api.github.com:443
 
       - name: Check out code base
-        if: github.event_name == 'pull_request'
+        if: github.event_name != 'pull_request_target'
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
         with:
           fetch-depth: 0
