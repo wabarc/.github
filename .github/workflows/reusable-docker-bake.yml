@@ -47,15 +47,14 @@ on:
         required: true
         description: "A comma separated list of target for push image."
 
-permissions:
-  contents: read
-  packages: write
-  id-token: write
-
 jobs:
   docker-buildx-bake:
     name: Build and push Docker image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
