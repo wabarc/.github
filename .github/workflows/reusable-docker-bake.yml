@@ -179,11 +179,3 @@ jobs:
           docker image inspect ${{ steps.prep.outputs.docker }}:${{ steps.meta.outputs.version }}
           docker pull ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
           docker image inspect ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: wayback
-          path: ./dist/*
-          if-no-files-found: error
-
