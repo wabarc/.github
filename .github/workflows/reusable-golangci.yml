@@ -38,6 +38,8 @@ jobs:
             github.com:443
             api.github.com:443
             objects.githubusercontent.com:443
+            proxy.golang.org:443
+            sum.golang.org:443
 
       - name: Check out code base
         if: github.event_name == 'push'
