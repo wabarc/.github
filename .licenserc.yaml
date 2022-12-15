@@ -19,5 +19,6 @@ header:
     - '**/*.md'
     - 'LICENSE'
     - 'CODEOWNERS'
+    - 'renovate.json'
 
   comment: on-failure
