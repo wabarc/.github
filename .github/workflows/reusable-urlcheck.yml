@@ -46,7 +46,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run url checker
-        uses: urlstechie/urlchecker-action@816b328eb5bd2b35a1f72230bf2ff4b7ca0680fe # 0.0.33
+        uses: urlstechie/urlchecker-action@b643b43e2ac605e1475331c7b67247d242b7dce4 # 0.0.34
         with:
           exclude_patterns: ".onion,https://github.com/,https://repo.wabarc.eu.org/"
 
