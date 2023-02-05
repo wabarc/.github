@@ -20,6 +20,9 @@ permissions:
 jobs:
   semgrep:
     runs-on: ubuntu-latest
+    permissions:
+      # Needed to upload the results to code-scanning dashboard.
+      security-events: write
     container:
       image: returntocorp/semgrep:sha-293a57f
     env:
