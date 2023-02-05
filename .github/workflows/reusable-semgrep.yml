@@ -52,26 +52,41 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run Bug Scan
-        run: semgrep ci
+        run: semgrep ci --sarif --output=../semgrep/r2c-bug-scan.sarif
         env:
-          SEMGREP_RULES: p/r2c-bug-scan
+          SEMGREP_RULES: 'p/r2c-bug-scan'
 
       - name: Run CI
-        run: semgrep ci
+        run: semgrep ci --sarif --output=../semgrep/r2c-ci.sarif
         env:
-          SEMGREP_RULES: p/r2c-ci
+          SEMGREP_RULES: 'p/r2c-ci'
 
       - name: Run Best Practices
-        run: semgrep ci
+        run: semgrep ci --sarif --output=../semgrep/r2c-best-practices.sarif
         env:
-          SEMGREP_RULES: p/r2c-best-practices
+          SEMGREP_RULES: 'p/r2c-best-practices'
 
       - name: Run Security Audit
-        run: semgrep ci
+        run: semgrep ci --sarif --output=../semgrep/r2c-security-audit.sarif
         env:
-          SEMGREP_RULES: p/r2c-security-audit
+          SEMGREP_RULES: 'p/r2c-security-audit'
 
       - name: Run GoSec
-        run: semgrep ci
+        run: semgrep ci --sarif --output=../semgrep/gosec.sarif
         env:
-          SEMGREP_RULES: p/gosec
+          SEMGREP_RULES: 'p/gosec'
+
+      - name: Run Secrets Detecting
+        run: semgrep ci --sarif --output=../semgrep/secrets.sarif
+        env:
+          SEMGREP_RULES: 'p/secrets'
+
+      - name: Run insecure-transport Detecting
+        run: semgrep ci --sarif --output=../semgrep/insecure-transport.sarif
+        env:
+          SEMGREP_RULES: 'p/insecure-transport'
+
+      - name: Upload SARIF file for GitHub Advanced Security Dashboard
+        uses: github/codeql-action/upload-sarif@c3b6fce4ee2ca25bc1066aa3bf73962fda0e8898 # v2.1.31
+        with:
+          sarif_file: ../semgrep/*.sarif
