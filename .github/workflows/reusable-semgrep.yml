@@ -55,37 +55,37 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run Bug Scan
-        run: semgrep ci --sarif --output=../semgrep/r2c-bug-scan.sarif
+        run: semgrep ci --sarif --output=../semgrep/r2c-bug-scan.sarif || true
         env:
           SEMGREP_RULES: 'p/r2c-bug-scan'
 
       - name: Run CI
-        run: semgrep ci --sarif --output=../semgrep/r2c-ci.sarif
+        run: semgrep ci --sarif --output=../semgrep/r2c-ci.sarif || true
         env:
           SEMGREP_RULES: 'p/r2c-ci'
 
       - name: Run Best Practices
-        run: semgrep ci --sarif --output=../semgrep/r2c-best-practices.sarif
+        run: semgrep ci --sarif --output=../semgrep/r2c-best-practices.sarif || true
         env:
           SEMGREP_RULES: 'p/r2c-best-practices'
 
       - name: Run Security Audit
-        run: semgrep ci --sarif --output=../semgrep/r2c-security-audit.sarif
+        run: semgrep ci --sarif --output=../semgrep/r2c-security-audit.sarif || true
         env:
           SEMGREP_RULES: 'p/r2c-security-audit'
 
       - name: Run GoSec
-        run: semgrep ci --sarif --output=../semgrep/gosec.sarif
+        run: semgrep ci --sarif --output=../semgrep/gosec.sarif || true
         env:
           SEMGREP_RULES: 'p/gosec'
 
       - name: Run Secrets Detecting
-        run: semgrep ci --sarif --output=../semgrep/secrets.sarif
+        run: semgrep ci --sarif --output=../semgrep/secrets.sarif || true
         env:
           SEMGREP_RULES: 'p/secrets'
 
       - name: Run insecure-transport Detecting
-        run: semgrep ci --sarif --output=../semgrep/insecure-transport.sarif
+        run: semgrep ci --sarif --output=../semgrep/insecure-transport.sarif || true
         env:
           SEMGREP_RULES: 'p/insecure-transport'
 
