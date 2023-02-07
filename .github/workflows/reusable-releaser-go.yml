@@ -132,7 +132,7 @@ jobs:
         run: make bina
 
       - name: Create Release (with bina)
-        uses: softprops/action-gh-release@50195ba7f6f93d1ac97ba8332a178e008ad176aa
+        uses: softprops/action-gh-release@d4e8205d7e959a9107da6396278b2f1f07af0f9b
         if: ${{ inputs.generate-bina }}
         with:
           body_path: gittaglogs.txt
@@ -143,7 +143,7 @@ jobs:
           draft: false
 
       - name: Create Release
-        uses: softprops/action-gh-release@50195ba7f6f93d1ac97ba8332a178e008ad176aa
+        uses: softprops/action-gh-release@d4e8205d7e959a9107da6396278b2f1f07af0f9b
         if: ${{ inputs.generate-bina == false }}
         with:
           body_path: gittaglogs.txt
