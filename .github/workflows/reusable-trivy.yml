@@ -10,7 +10,7 @@ on:
       scan-type:
         type: string
         required: true
-        description: 'Trivy scan type, avaliable value: fs, image.'
+        description: 'Trivy scan type, available value: fs, image.'
       image-ref:
         type: string
         default: ''
