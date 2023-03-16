@@ -1,16 +1,11 @@
 ## Description
 <!-- Include a summary of the change made and also list the dependencies that are required if any -->
 
----
-## Type of change
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] This change requires a documentation update
+This PR ...
 
----
-# Checklist
-- [ ] I have followed the contributing guidelines.
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes needed to the documentation
+Closes #
+
+## Checklist
+- [ ] I have followed the [contributing guidelines](https://github.com/wabarc/.github/blob/main/CONTRIBUTING.md)
+- [ ] I have reviewed and understood the [Code of Conduct](https://github.com/wabarc/.github/blob/main/CODE_OF_CONDUCT.md)
+- [ ] I have searched and make sure there's no duplicate PRs
