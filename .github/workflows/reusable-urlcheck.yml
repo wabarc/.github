@@ -18,6 +18,10 @@ on:
         type: string
         default: ".onion,https://github.com/,https://repo.wabarc.eu.org/"
         description: "A comma separated patterns to exclude during URL checks."
+      timeout:
+        type: number
+        default: 30
+        description: "The timeout seconds for requests."
 
 permissions:
   contents: read
@@ -54,4 +58,4 @@ jobs:
         uses: urlstechie/urlchecker-action@b643b43e2ac605e1475331c7b67247d242b7dce4 # 0.0.34
         with:
           exclude_patterns: ${{ inputs.exclude-patterns }}
-
+          timeout: ${{ inputs.timeout }}
