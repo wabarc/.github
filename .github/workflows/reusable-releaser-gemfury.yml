@@ -103,4 +103,4 @@ jobs:
         working-directory: ${{ steps.artifact.outputs.artifact-dir }}
         run: |
           owner=${{ inputs.owner }}
-          for f in ./*.deb; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/$owner/; done
+          for f in ./*.rpm; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/$owner/; done
