@@ -25,7 +25,7 @@ on:
         description: 'Whether or not to define a workflow called is releasing.'
     secrets:
       snapcraft-token:
-        description: 'The login data for the Snap Store produced with "snapcraft export-login"'
+        description: 'The login data for the Snap Store produced with "snapcraft export-login", see: https://gist.github.com/waybackarchiver/076163653504f5fcef9bc4cc55422f5e'
       wayback-ipfs-apikey:
         description: 'Managed IPFS credential for distribution binaries.'
 
