@@ -13,6 +13,11 @@ on:
       - '**'
     types: [ opened, synchronize, reopened ]
   workflow_call:
+    inputs:
+      slim:
+        type: boolean
+        default: true
+        description: 'Whether or not to use Super-Linter Slim image action.'
 
 permissions:
   contents: read
@@ -47,7 +52,8 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Lint Code Base
-        uses: github/super-linter@bb2d833b08b6c288608686672b93a8a4589cdc49 # v4.9.7
+        uses: github/super-linter/slim@bb2d833b08b6c288608686672b93a8a4589cdc49 # v4.9.7
+        if: ${{ inputs.slim }}
         env:
           DEFAULT_BRANCH: 'main'
           VALIDATE_MARKDOWN: true
@@ -56,3 +62,13 @@ jobs:
           VALIDATE_BASH_EXEC: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Lint Code Base
+        uses: github/super-linter/slim@bb2d833b08b6c288608686672b93a8a4589cdc49 # v4.9.7
+        if: ${{ inputs.slim == false }}
+        env:
+          DEFAULT_BRANCH: 'main'
+          VALIDATE_MARKDOWN: true
+          VALIDATE_DOCKERFILE: true
+          VALIDATE_BASH: true
+          VALIDATE_BASH_EXEC: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
