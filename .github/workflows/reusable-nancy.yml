@@ -25,8 +25,7 @@ jobs:
             github.com:443
             api.github.com:443
             objects.githubusercontent.com:443
-            acghubeus1.actions.githubusercontent.com:443
-            pipelinesghubeus2.actions.githubusercontent.com:443
+            *.actions.githubusercontent.com:443
             dl-cdn.alpinelinux.org:443
             ossindex.sonatype.org:443
             proxy.golang.org:443
