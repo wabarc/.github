@@ -55,6 +55,7 @@ jobs:
             api.securityscorecards.dev:443
             bestpractices.coreinfrastructure.org:443
             sigstore-tuf-root.storage.googleapis.com:443
+            sd5kacprodeus2file5.blob.core.windows.net:443
             ghcr.io:443
 
       - name: Check out code base
