@@ -26,6 +26,10 @@ on:
         type: string
         required: true
         description: 'Path to stores artifacts.'
+      egress-policy:
+        type: string
+        default: 'block'
+        description: 'Harden-Runner egress traffic policy'
     secrets:
       wayback-ipfs-apikey:
         description: 'Managed IPFS credential for distribution binaries.'
@@ -41,7 +45,7 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@1f99358870fe1c846a3ccba386cc2b2246836776 # v2.2.1
         with:
-          egress-policy: audit
+          egress-policy: ${{ inputs.egress-policy || 'block' }}
           disable-telemetry: true
 
       - name: Check out code base

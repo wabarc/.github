@@ -22,6 +22,10 @@ on:
         type: number
         default: 30
         description: "The timeout seconds for requests."
+      egress-policy:
+        type: string
+        default: 'audit'
+        description: 'Harden-Runner egress traffic policy'
 
 permissions:
   contents: read
@@ -34,7 +38,7 @@ jobs:
         uses: step-security/harden-runner@1f99358870fe1c846a3ccba386cc2b2246836776 # v2.2.1
         with:
           disable-sudo: true
-          egress-policy: audit
+          egress-policy: ${{ inputs.egress-policy || 'audit' }}
           disable-telemetry: true
           allowed-endpoints: >
             github.com:443

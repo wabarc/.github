@@ -13,6 +13,11 @@ on:
       - '**'
     types: [ opened, synchronize, reopened ]
   workflow_call:
+    inputs:
+      egress-policy:
+        type: string
+        default: 'block'
+        description: 'Harden-Runner egress traffic policy'
 
 permissions:
   contents: read
@@ -26,7 +31,7 @@ jobs:
         uses: step-security/harden-runner@1f99358870fe1c846a3ccba386cc2b2246836776 # v2.2.1
         with:
           disable-sudo: true
-          egress-policy: block
+          egress-policy: ${{ inputs.egress-policy || 'block' }}
           disable-telemetry: true
           allowed-endpoints: >
             github.com:443
