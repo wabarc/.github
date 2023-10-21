@@ -21,6 +21,10 @@ on:
       deny-licenses:
         type: string
         description: "Add a custom list of licenses you want to block."
+      egress-policy:
+        type: string
+        default: 'block'
+        description: 'Harden-Runner egress traffic policy'
 
 # Declare default permissions as read only.
 permissions:
@@ -35,7 +39,7 @@ jobs:
         uses: step-security/harden-runner@1f99358870fe1c846a3ccba386cc2b2246836776 # v2.2.1
         with:
           disable-sudo: true
-          egress-policy: block
+          egress-policy: ${{ inputs.egress-policy }}
           disable-telemetry: true
           allowed-endpoints: >
             github.com:443
