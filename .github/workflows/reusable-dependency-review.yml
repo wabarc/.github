@@ -45,7 +45,7 @@ jobs:
             github.com:443
             api.github.com:443
             actions-results-receiver-production.githubapp.com:443
-            *.actions.githubusercontent.com:443
+            *.actions.githubusercontent.com
 
       - name: Check out code base
         if: github.event_name == 'push' || github.event_name == 'schedule'
