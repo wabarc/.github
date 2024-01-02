@@ -35,7 +35,7 @@ jobs:
           allowed-endpoints: >
             github.com:443
             api.github.com:443
-            *.actions.githubusercontent.com:443
+            *.actions.githubusercontent.com
 
       - name: Check out code base
         if: github.event_name == 'push'
