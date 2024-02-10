@@ -99,7 +99,7 @@ jobs:
 
       - id: builder
         name: Build Snap
-        uses: snapcore/action-build@3457752ec9b1c79a8290b5167fce2d14df0997c1 # v1.1.2
+        uses: snapcore/action-build@2096990827aa966f773676c8a53793c723b6b40f # v1.2.0
         with:
           snapcraft-channel: ${{ inputs.channel }}
         env:
