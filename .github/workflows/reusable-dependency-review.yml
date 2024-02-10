@@ -64,7 +64,7 @@ jobs:
 
       - name: Dependency Review
         if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@c090f4e553673e6e505ea70d6a95362ee12adb94 # v3.0.3
+        uses: actions/dependency-review-action@c74b580d73376b7750d3d2a50bfb8adc2c937507 # v3.1.5
         with:
           fail-on-severity: ${{ inputs.fail-on-severity }}
           allow-ghsas: ${{ inputs.allow-ghsas }}
@@ -74,7 +74,7 @@ jobs:
 
       - name: Dependency Review
         if: github.event_name == 'push' || github.event_name == 'schedule'
-        uses: actions/dependency-review-action@c090f4e553673e6e505ea70d6a95362ee12adb94 # v3.0.3
+        uses: actions/dependency-review-action@c74b580d73376b7750d3d2a50bfb8adc2c937507 # v3.1.5
         with:
           fail-on-severity: ${{ inputs.fail-on-severity }}
           allow-ghsas: ${{ inputs.allow-ghsas }}
