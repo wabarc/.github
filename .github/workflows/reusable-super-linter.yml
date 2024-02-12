@@ -25,6 +25,8 @@ on:
 
 permissions:
   contents: read
+  packages: read
+  statuses: write
 
 jobs:
   super-linter:
@@ -58,7 +60,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Lint Code Base
-        uses: github/super-linter/slim@bb2d833b08b6c288608686672b93a8a4589cdc49 # v4.9.7
+        uses: super-linter/super-linter/slim@ff5037c06042e564803502feb97f8a686f3b0171 # v6.0.0
         if: ${{ inputs.slim }}
         env:
           DEFAULT_BRANCH: 'main'
@@ -69,7 +71,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint Code Base
-        uses: github/super-linter/slim@bb2d833b08b6c288608686672b93a8a4589cdc49 # v4.9.7
+        uses: super-linter/super-linter@ff5037c06042e564803502feb97f8a686f3b0171 # v6.0.0
         if: ${{ inputs.slim == false }}
         env:
           DEFAULT_BRANCH: 'main'
