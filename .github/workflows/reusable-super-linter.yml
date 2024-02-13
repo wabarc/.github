@@ -25,13 +25,12 @@ on:
 
 permissions:
   contents: read
+  packages: read
+  statuses: write
 
 jobs:
   super-linter:
     runs-on: ubuntu-latest
-    permissions:
-      packages: read
-      statuses: write
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@1f99358870fe1c846a3ccba386cc2b2246836776 # v2.2.1
