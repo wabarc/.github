@@ -25,8 +25,6 @@ on:
 
 permissions:
   contents: read
-  packages: read
-  statuses: write
 
 jobs:
   super-linter:
@@ -43,7 +41,7 @@ jobs:
             api.github.com:443
             actions-results-receiver-production.githubapp.com:443
             pipelinesghubeus2.actions.githubusercontent.com:443
-            *.actions.githubusercontent.com
+            results-receiver.actions.githubusercontent.com:443
 
       - name: Check out code base
         if: github.event_name == 'push'
@@ -68,8 +66,10 @@ jobs:
           VALIDATE_MARKDOWN: true
           VALIDATE_DOCKERFILE: true
           VALIDATE_BASH: true
-          VALIDATE_BASH_EXEC: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        permissions:
+          packages: read
+          statuses: write
 
       - name: Lint Code Base
         uses: super-linter/super-linter@ff5037c06042e564803502feb97f8a686f3b0171 # v6.0.0
@@ -79,5 +79,7 @@ jobs:
           VALIDATE_MARKDOWN: true
           VALIDATE_DOCKERFILE: true
           VALIDATE_BASH: true
-          VALIDATE_BASH_EXEC: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        permissions:
+          packages: read
+          statuses: write

@@ -35,7 +35,8 @@ jobs:
           allowed-endpoints: >
             github.com:443
             api.github.com:443
-            *.actions.githubusercontent.com
+            results-receiver.actions.githubusercontent.com:443
+            pipelinesghubeus2.actions.githubusercontent.com:443
 
       - name: Check out code base
         if: github.event_name == 'push'
