@@ -29,6 +29,9 @@ permissions:
 jobs:
   super-linter:
     runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      statuses: write
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@1f99358870fe1c846a3ccba386cc2b2246836776 # v2.2.1
@@ -67,9 +70,6 @@ jobs:
           VALIDATE_DOCKERFILE: true
           VALIDATE_BASH: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        permissions:
-          packages: read
-          statuses: write
 
       - name: Lint Code Base
         uses: super-linter/super-linter@ff5037c06042e564803502feb97f8a686f3b0171 # v6.0.0
