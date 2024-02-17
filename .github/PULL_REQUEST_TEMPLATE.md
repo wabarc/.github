@@ -9,3 +9,4 @@ Closes #
 - [ ] I have followed the [contributing guidelines](https://github.com/wabarc/.github/blob/main/CONTRIBUTING.md)
 - [ ] I have reviewed and understood the [Code of Conduct](https://github.com/wabarc/.github/blob/main/CODE_OF_CONDUCT.md)
 - [ ] I have searched and make sure there's no duplicate PRs
+- [ ] I have updated the changelog in case of need
