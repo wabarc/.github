@@ -20,5 +20,6 @@ header:
     - 'LICENSE'
     - 'CODEOWNERS'
     - 'renovate.json'
+    - 'meilisearch/action.yml'
 
   comment: on-failure

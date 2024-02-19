@@ -1,0 +1,101 @@
+name: "Set up Meilisearch"
+author: "Wayback Archiver"
+description: "A composite action that set up Meilisearch"
+
+inputs:
+  version:
+    description: "The version of Meilisearch, e.g. 1.6.2"
+    required: false
+    default: ""
+  master-key:
+    description: "The master key of Meilisearch"
+    required: false
+    default: ""
+  port:
+    description: "The port of Meilisearch"
+    required: false
+    default: "7700"
+
+outputs:
+  version:
+    description: "The installed version of Meilisearch."
+    value: ${{ steps.prepare.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare
+      id: prepare
+      shell: bash
+      run: |
+        if [ -n "$INPUT_VERSION" ]; then
+          VERSION="v$INPUT_VERSION"
+        else
+          VERSION=$(curl --proto '=https' --tlsv1.2 -fSL https://api.github.com/repos/meilisearch/meilisearch/releases/latest | jq -r ".tag_name")
+        fi
+        echo "version=$(echo $VERSION)" >> $GITHUB_OUTPUT
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+
+    - name: Download binary
+      shell: bash
+      if: runner.os == 'Linux'
+      run: |
+        echo ::group::Download binary
+        rm -f "$RUNNER_TEMP/meilisearch"
+        URL="https://github.com/meilisearch/meilisearch/releases/download/$VERSION/meilisearch-linux-amd64"
+        curl --proto '=https' --tlsv1.2 -fSL "$URL" -o "$RUNNER_TEMP/meilisearch" --max-time 300
+        echo ::endgroup::
+      env:
+        VERSION: ${{ steps.prepare.outputs.version }}
+
+    - name: Download binary
+      shell: bash
+      if: runner.os == 'macOS'
+      run: |
+        echo ::group::Download binary
+        rm -f "$RUNNER_TEMP/meilisearch"
+        URL="https://github.com/meilisearch/meilisearch/releases/download/$VERSION/meilisearch-macos-amd64"
+        curl --proto '=https' --tlsv1.2 -fSL "$URL" -o "$RUNNER_TEMP/meilisearch" --max-time 300
+        echo ::endgroup::
+      env:
+        VERSION: ${{ steps.prepare.outputs.version }}
+
+    - name: Download binary
+      shell: bash
+      if: runner.os == 'Windows'
+      run: |
+        echo ::group::Download binary
+        rm -f "$RUNNER_TEMP\meilisearch.exe"
+        URL="https://github.com/meilisearch/meilisearch/releases/download/$VERSION/meilisearch-windows-amd64.exe"
+        curl --proto '=https' --tlsv1.2 -fSL "$URL" -o "$RUNNER_TEMP\meilisearch.exe" --max-time 300
+        echo ::endgroup::
+      env:
+        VERSION: ${{ steps.prepare.outputs.version }}
+
+    - name: Launch Meilisearch
+      shell: bash
+      run: |
+        echo ::group::Launch Meilisearch
+        ADDRESS="0.0.0.0:$MEILISEARCH_PORT"
+        STDERR="$RUNNER_TEMP/meilisearch.log"
+        MEILI="$RUNNER_TEMP/meilisearch"
+        if [ ${{ runner.os }} = "Windows" ]; then
+          STDERR="$RUNNER_TEMP\meilisearch.log"
+          MEILI="$RUNNER_TEMP\meilisearch.exe"
+        fi
+        chmod a+rx "$MEILI"
+        "$MEILI" --http-addr "$ADDRESS" &> "$STDERR" &
+        sleep 3 # Waiting for command outputs
+        cat "$STDERR"
+        echo "address=$(echo $ADDRESS)" >> $GITHUB_OUTPUT
+        echo ::endgroup::
+      env:
+        MEILI_MASTER_KEY: ${{ inputs.master-key }}
+        MEILISEARCH_PORT: ${{ inputs.port }}
+        MEILI_NO_ANALYTICS: true
+
+branding:
+  icon: 'life-buoy'
+  color: 'pink'
+
