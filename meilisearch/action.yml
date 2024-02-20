@@ -74,6 +74,7 @@ runs:
         VERSION: ${{ steps.prepare.outputs.version }}
 
     - name: Launch Meilisearch
+      working-directory: ${{ runner.temp }}
       shell: bash
       run: |
         echo ::group::Launch Meilisearch
@@ -98,4 +99,3 @@ runs:
 branding:
   icon: 'life-buoy'
   color: 'pink'
-
