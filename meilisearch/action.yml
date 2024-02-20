@@ -31,7 +31,8 @@ runs:
         if [ -n "$INPUT_VERSION" ]; then
           VERSION="v$INPUT_VERSION"
         else
-          VERSION=$(curl --proto '=https' --tlsv1.2 -fSL https://api.github.com/repos/meilisearch/meilisearch/releases/latest | jq -r ".tag_name")
+          VERSION=$(curl --proto '=https' --retry 5 --tlsv1.2 -IkLs -o NUL -w %{url_effective} \
+            https://github.com/meilisearch/meilisearch/releases/latest | grep -o "[^/]*$")
         fi
         echo "version=$(echo $VERSION)" >> $GITHUB_OUTPUT
       env:
@@ -44,7 +45,7 @@ runs:
         echo ::group::Download binary
         rm -f "$RUNNER_TEMP/meilisearch"
         URL="https://github.com/meilisearch/meilisearch/releases/download/$VERSION/meilisearch-linux-amd64"
-        curl --proto '=https' --tlsv1.2 -fSL "$URL" -o "$RUNNER_TEMP/meilisearch" --max-time 300
+        curl --proto '=https' --retry 5 --tlsv1.2 -fSL "$URL" -o "$RUNNER_TEMP/meilisearch" --max-time 300
         echo ::endgroup::
       env:
         VERSION: ${{ steps.prepare.outputs.version }}
@@ -56,7 +57,7 @@ runs:
         echo ::group::Download binary
         rm -f "$RUNNER_TEMP/meilisearch"
         URL="https://github.com/meilisearch/meilisearch/releases/download/$VERSION/meilisearch-macos-amd64"
-        curl --proto '=https' --tlsv1.2 -fSL "$URL" -o "$RUNNER_TEMP/meilisearch" --max-time 300
+        curl --proto '=https' --retry 5 --tlsv1.2 -fSL "$URL" -o "$RUNNER_TEMP/meilisearch" --max-time 300
         echo ::endgroup::
       env:
         VERSION: ${{ steps.prepare.outputs.version }}
@@ -68,7 +69,7 @@ runs:
         echo ::group::Download binary
         rm -f "$RUNNER_TEMP\meilisearch.exe"
         URL="https://github.com/meilisearch/meilisearch/releases/download/$VERSION/meilisearch-windows-amd64.exe"
-        curl --proto '=https' --tlsv1.2 -fSL "$URL" -o "$RUNNER_TEMP\meilisearch.exe" --max-time 300
+        curl --proto '=https' --retry 5 --tlsv1.2 -fSL "$URL" -o "$RUNNER_TEMP\meilisearch.exe" --max-time 300
         echo ::endgroup::
       env:
         VERSION: ${{ steps.prepare.outputs.version }}
