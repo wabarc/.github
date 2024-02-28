@@ -86,7 +86,8 @@ jobs:
             proxy.golang.org:443
             sum.golang.org:443
             storage.googleapis.com:443
-            *.actions.githubusercontent.com:443
+            '*.actions.githubusercontent.com:443'
+            '*.blob.core.windows.net'
 
       - name: Check out code base
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
