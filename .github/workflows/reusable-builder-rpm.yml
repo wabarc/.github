@@ -26,6 +26,10 @@ on:
     secrets:
       wayback-ipfs-apikey:
         description: 'Managed IPFS credential for distribution binaries.'
+      wayback-siging-key:
+        description: 'RPM siging private key.'
+      wayback-siging-passpharse:
+        description: 'Passpharse of siging private key.'
 
 permissions:
   contents: read
@@ -60,6 +64,8 @@ jobs:
       - name: Build RPM package
         env:
           WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
+          WAYBACK_SIGNING_KEY: ${{ secrets.wayback-siging-key }}
+          WAYBACK_SIGNING_PASSPHARSE: ${{ secrets.wayback-siging-passpharse }}
         run: bash -c '${{ inputs.params }}'
 
       - name: Upload artifacts
