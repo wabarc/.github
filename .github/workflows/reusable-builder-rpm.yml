@@ -24,8 +24,12 @@ on:
         default: 'block'
         description: 'Harden-Runner egress traffic policy'
     secrets:
+      wayback-ipfs-target:
+        description: 'Managed IPFS target for distribution binaries.'
       wayback-ipfs-apikey:
         description: 'Managed IPFS credential for distribution binaries.'
+      wayback-ipfs-secret:
+        description: 'Managed IPFS secret for distribution binaries.'
       wayback-signing-key:
         description: 'RPM signing private key.'
       wayback-signing-passpharse:
@@ -63,7 +67,9 @@ jobs:
 
       - name: Build RPM package
         env:
+          WAYBACK_IPFS_TARGET: ${{ secrets.wayback-ipfs-target }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
+          WAYBACK_IPFS_SECRET: ${{ secrets.wayback-ipfs-secret }}
           WAYBACK_SIGNING_KEY: ${{ secrets.wayback-signing-key }}
           WAYBACK_SIGNING_PASSPHARSE: ${{ secrets.wayback-signing-passpharse }}
         run: bash -c '${{ inputs.params }}'

@@ -27,8 +27,12 @@ on:
         default: 'block'
         description: 'Harden-Runner egress traffic policy'
     secrets:
+      wayback-ipfs-target:
+        description: 'Managed IPFS target for distribution binaries.'
       wayback-ipfs-apikey:
         description: 'Managed IPFS credential for distribution binaries.'
+      wayback-ipfs-secret:
+        description: 'Managed IPFS secret for distribution binaries.'
 
 permissions:
   contents: read
@@ -87,7 +91,9 @@ jobs:
       - name: Build Debian package
         id: builder
         env:
+          WAYBACK_IPFS_TARGET: ${{ secrets.wayback-ipfs-target }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
+          WAYBACK_IPFS_SECRET: ${{ secrets.wayback-ipfs-secret }}
           GOARCH: ${{ inputs.go-arch }}
           GOARM: ${{ inputs.go-arm }}
         run: |

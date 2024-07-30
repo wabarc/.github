@@ -30,8 +30,12 @@ on:
     secrets:
       snapcraft-token:
         description: 'The login data for the Snap Store produced with "snapcraft export-login", see: https://gist.github.com/waybackarchiver/076163653504f5fcef9bc4cc55422f5e'
+      wayback-ipfs-target:
+        description: 'Managed IPFS target for distribution binaries.'
       wayback-ipfs-apikey:
         description: 'Managed IPFS credential for distribution binaries.'
+      wayback-ipfs-secret:
+        description: 'Managed IPFS secret for distribution binaries.'
 
 permissions:
   contents: read
@@ -103,7 +107,9 @@ jobs:
         with:
           snapcraft-channel: ${{ inputs.channel }}
         env:
+          WAYBACK_IPFS_TARGET: ${{ secrets.wayback-ipfs-target }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
+          WAYBACK_IPFS_SECRET: ${{ secrets.wayback-ipfs-secret }}
 
       - name: Publish Snap
         uses: snapcore/action-publish@0a8d537ae06f4a292e8b4ef1084cd5631b3c6871 # v1.1.1
