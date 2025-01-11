@@ -101,7 +101,7 @@ jobs:
           path: results.sarif
 
       - name: Upload to code-scanning
-        uses: github/codeql-action/upload-sarif@c3b6fce4ee2ca25bc1066aa3bf73962fda0e8898 # v2.1.31
+        uses: github/codeql-action/upload-sarif@b8d3b6e8af63cde30bdc382c0bc28114f4346c88 # v2.28.1
         with:
           sarif_file: results.sarif
 
