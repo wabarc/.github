@@ -29,7 +29,7 @@ jobs:
       # Needed to upload the results to code-scanning dashboard.
       security-events: write
     container:
-      image: returntocorp/semgrep:sha-293a57f
+      image: semgrep/semgrep@sha256:5930c9438968657745cc8c193e338ec9e08c5ead0b926b1b4ed37e06a9cc2270 # 1.151.0
     env:
       SEMGREP_SEND_METRICS: 'off'
     steps:
