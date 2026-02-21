@@ -70,7 +70,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@2b6a709cf9c4025c5438138008beaddbb02086f0 # 0.14.0
+        uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518 # 0.34.1
         with:
           scan-type: '${{ inputs.scan-type }}'
           scan-ref: '.'
@@ -128,7 +128,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@2b6a709cf9c4025c5438138008beaddbb02086f0 # 0.14.0
+        uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518 # 0.34.1
         with:
           image-ref: '${{ inputs.image-ref }}'
           format: 'template'
