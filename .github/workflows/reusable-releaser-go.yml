@@ -75,10 +75,13 @@ jobs:
       - name: Restructure artifacts
         working-directory: ${{ inputs.product }}-staging
         id: artifact
+        env:
+          INPUT_PRODUCT: ${{ inputs.product }}
+          ARTIFACT_DIR: ${{ env.ARTIFACT_DIR }}
         run: |
           set -eux pipefail
-          destdir="${{ github.workspace }}/${{ env.ARTIFACT_DIR }}"
-          expr="*${{ inputs.product }}*"
+          destdir="${{ github.workspace }}/${ARTIFACT_DIR}"
+          expr="*${INPUT_PRODUCT}*"
           mkdir -p $destdir
           echo '##[info] list files recursively in staging directory'
           ls -R .
@@ -91,8 +94,10 @@ jobs:
       - name: Generate digests
         id: digest
         working-directory: ${{ steps.artifact.outputs.artifact-dir }}
+        env:
+          INPUT_PRODUCT: ${{ inputs.product }}
         run: |
-          product="${{ inputs.product }}"
+          product="${INPUT_PRODUCT}"
           digest="$(find *${product}* -type f -exec sha256sum {} +)"
 
           delimiter="$(openssl rand -hex 8)"

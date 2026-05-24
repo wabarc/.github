@@ -85,6 +85,7 @@ jobs:
           VERSION: ${{ inputs.version }}
           PRODUCT: ${{ inputs.product }}
           OWNER: ${{ inputs.owner }}
+          PARAMS: ${{ inputs.params }}
         run: |
           REF="$(git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')"
           VERSION="${VERSION:-$REF}"
@@ -97,7 +98,7 @@ jobs:
           flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           flatpak install -y --noninteractive flathub org.freedesktop.Platform//22.08 org.freedesktop.Sdk//22.08
 
-          bash -c "${{ inputs.params }}"
+          bash -c "${PARAMS}"
           mv "build/binary/${PRODUCT}" "build/flatpak/${PRODUCT}"
 
           flatpak-builder --user --disable-rofiles-fuse --repo=repo --force-clean flatpak_app ${MANIFEST_PATH} --install-deps-from=flathub

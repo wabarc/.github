@@ -142,6 +142,7 @@ jobs:
           GOMIPS: ${{ inputs.go-mips }}
           GOMIPS64: ${{ inputs.go-mips64 }}
           GOMIPSLE: ${{ inputs.go-mipsle }}
+          INPUT_PRODUCT: ${{ inputs.product }}
         run: |
           TARGET="${GOOS}-${GOARCH}"
           if [[ -n "${GOARM}" ]]; then
@@ -154,7 +155,7 @@ jobs:
             TARGET="${TARGET}-${GOMIPSLE}"
           fi
           make ${TARGET}
-          echo "filename=${{ inputs.product }}-${TARGET}" >> $GITHUB_OUTPUT
+          echo "filename=${INPUT_PRODUCT}-${TARGET}" >> $GITHUB_OUTPUT
           echo "target=${TARGET}" >> $GITHUB_OUTPUT
 
       - name: Archive binary (for release)

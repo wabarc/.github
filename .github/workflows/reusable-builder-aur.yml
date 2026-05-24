@@ -79,7 +79,8 @@ jobs:
           WAYBACK_IPFS_TARGET: ${{ secrets.wayback-ipfs-target }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
           WAYBACK_IPFS_SECRET: ${{ secrets.wayback-ipfs-secret }}
-        run: bash -c '${{ inputs.params }}'
+          PARAMS: ${{ inputs.params }}
+        run: bash -c "$PARAMS"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0

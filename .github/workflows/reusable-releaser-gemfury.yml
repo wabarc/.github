@@ -73,11 +73,14 @@ jobs:
       - name: Restructure artifacts
         working-directory: ${{ inputs.product }}-staging
         id: artifact
+        env:
+          INPUT_PRODUCT: ${{ inputs.product }}
+          ARTIFACT_DIR: ${{ env.ARTIFACT_DIR }}
         run: |
           set -eu pipefail
-          destdir="${{ github.workspace }}/${{ env.ARTIFACT_DIR }}"
-          exprdeb="*${{ inputs.product }}*.deb"
-          exprrpm="*${{ inputs.product }}*.rpm"
+          destdir="${{ github.workspace }}/${ARTIFACT_DIR}"
+          exprdeb="*${INPUT_PRODUCT}*.deb"
+          exprrpm="*${INPUT_PRODUCT}*.rpm"
           mkdir -p $destdir
           echo '##[info] list files recursively in staging directory'
           ls -R .
@@ -95,16 +98,18 @@ jobs:
         if: contains(inputs.type, 'deb')
         env:
           FURY_TOKEN: ${{ secrets.fury-token }}
+          INPUT_OWNER: ${{ inputs.owner }}
         working-directory: ${{ steps.artifact.outputs.artifact-dir }}
         run: |
-          owner=${{ inputs.owner }}
+          owner=${INPUT_OWNER}
           for f in ./*.deb; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/$owner/; done
 
       - name: Publish RPM Repository
         if: contains(inputs.type, 'rpm')
         env:
           FURY_TOKEN: ${{ secrets.fury-token }}
+          INPUT_OWNER: ${{ inputs.owner }}
         working-directory: ${{ steps.artifact.outputs.artifact-dir }}
         run: |
-          owner=${{ inputs.owner }}
+          owner=${INPUT_OWNER}
           for f in ./*.rpm; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/$owner/; done

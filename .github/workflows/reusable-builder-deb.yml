@@ -94,6 +94,7 @@ jobs:
           WAYBACK_IPFS_TARGET: ${{ secrets.wayback-ipfs-target }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.wayback-ipfs-apikey }}
           WAYBACK_IPFS_SECRET: ${{ secrets.wayback-ipfs-secret }}
+          INPUT_PRODUCT: ${{ inputs.product }}
           GOARCH: ${{ inputs.go-arch }}
           GOARM: ${{ inputs.go-arm }}
         run: |
@@ -105,7 +106,7 @@ jobs:
           PKG_ARCH="${PKG_ARCH//32}"
           echo "DOCKER_PLATFORM: ${PKG_ARCH}"
           make debian DOCKER_PLATFORM=${PKG_ARCH}
-          echo "filename=${{ inputs.product }}-deb-${PKG_ARCH//\/}" >> $GITHUB_OUTPUT
+          echo "filename=${INPUT_PRODUCT}-deb-${PKG_ARCH//\/}" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
