@@ -54,7 +54,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Check License Header
-        uses: apache/skywalking-eyes/header@438e4ea5682269933ea2c8b5608662e52af26959 # v0.4.0
+        uses: apache/skywalking-eyes/header@61275cc80d0798a405cb070f7d3a8aaf7cf2c2c1 # v0.8.0
 
   dependency:
     runs-on: ubuntu-latest
@@ -87,5 +87,5 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: "Check Dependencies' License"
-        uses: apache/skywalking-eyes/dependency@438e4ea5682269933ea2c8b5608662e52af26959 # v0.4.0
+        uses: apache/skywalking-eyes/dependency@61275cc80d0798a405cb070f7d3a8aaf7cf2c2c1 # v0.8.0
 
