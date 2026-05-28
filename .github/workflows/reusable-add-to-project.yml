@@ -74,14 +74,14 @@ jobs:
 
       - name: Add to Project
         if: github.event == 'workflow_call'
-        uses: actions/add-to-project@960fbad431afda394cfcf8743445e741acd19e85 # v0.4.0
+        uses: actions/add-to-project@1b844f0c5ac6446a402e0cb3693f9be5eca188c5 # v0.6.1
         with:
           project-url: ${{ inputs.project-url }}
           github-token: ${{ secrets.github-token }}
 
       - name: Add to Project
         if: github.event != 'workflow_call' && github.actor == 'dependabot[bot]'
-        uses: actions/add-to-project@960fbad431afda394cfcf8743445e741acd19e85 # v0.4.0
+        uses: actions/add-to-project@1b844f0c5ac6446a402e0cb3693f9be5eca188c5 # v0.6.1
         with:
           project-url: ${{ env.PROJECT_URL }}
           github-token: ${{ secrets.GH_PROJECTS_ACTION_TOKEN }}
