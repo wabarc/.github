@@ -54,5 +54,5 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run alex with reviewdog
-        uses: reviewdog/action-alex@f95df9e356d97e67e4626f04ad125c4a99a906a9 # v1.13.0
+        uses: reviewdog/action-alex@347481655add010a2ae302df34b57c9bcfa0d6e4 # v1.17.0
 
