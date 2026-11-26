@@ -20,16 +20,18 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: ipfs/download-ipfs-distribution-action@v2
+    - uses: ipfs/download-ipfs-distribution-action@5ae401e7f85ea5ec93502a2a971057ceeae98a68 # v2.0.0
       with:
         name: kubo
         version: "v${{ inputs.version }}"
 
     - name: Init IPFS daemon
+      env:
+        IPFS_PORT: ${{ inputs.port }}
       run: |
         ipfs init --profile server,unixfs-v1-2025
         ipfs config Routing.Type autoclient
-        ipfs config Addresses.API "/ip4/127.0.0.1/tcp/${{ inputs.port }}"
+        ipfs config Addresses.API "/ip4/127.0.0.1/tcp/$IPFS_PORT"
         # advertise pinned content and MFS so ipfs-cluster peers can fetch
         # the full DAG without waiting on bitswap-only discovery
         ipfs config Provide.Strategy pinned+mfs+unique+entities
@@ -37,7 +39,7 @@ runs:
         ipfs config --json AutoTLS.Enabled false
       shell: bash
 
-    - uses: ipfs/start-ipfs-daemon-action@v1
+    - uses: ipfs/start-ipfs-daemon-action@db7e01d671495fb47f30e4bebc1ca43817ecdace # v1.1.0
       with:
         args: --enable-gc=false
 
