@@ -1,0 +1,50 @@
+name: "Set up IPFS"
+author: "Wayback Archiver"
+description: "A composite action that set up IPFS"
+
+inputs:
+  version:
+    description: "The version of IPFS, e.g. 0.43.2"
+    required: false
+    default: "0.43.2"
+  port:
+    description: "The port of IPFS"
+    required: false
+    default: "5001"
+
+outputs:
+  version:
+    description: "The installed version of IPFS."
+    value: ${{ steps.prepare.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - uses: ipfs/download-ipfs-distribution-action@v2
+      with:
+        name: kubo
+        version: "v${{ inputs.version }}"
+
+    - name: Init IPFS daemon
+      run: |
+        ipfs init --profile server,unixfs-v1-2025
+        ipfs config Routing.Type autoclient
+        ipfs config Addresses.API "/ip4/127.0.0.1/tcp/${{ inputs.port }}"
+        # advertise pinned content and MFS so ipfs-cluster peers can fetch
+        # the full DAG without waiting on bitswap-only discovery
+        ipfs config Provide.Strategy pinned+mfs+unique+entities
+        # CI node is ephemeral, no point in getting a cert for it
+        ipfs config --json AutoTLS.Enabled false
+      shell: bash
+
+    - uses: ipfs/start-ipfs-daemon-action@v1
+      with:
+        args: --enable-gc=false
+
+    - name: List swarm peers
+      run: ipfs swarm peers
+      shell: bash
+
+branding:
+  icon: 'life-buoy'
+  color: 'pink'
